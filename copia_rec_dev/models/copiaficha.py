@@ -1,7 +1,7 @@
-from odoo import models
+from odoo import models, fields
 
 class Copiaficha(models.Model):
-    _name = ''
-    _descripcion = 'Copia ficha'
+    _name = 'copia.ficha'
+    _description = 'Copia ficha'
 
-    
+    name = fields.Char(string='Nombre', required=True)

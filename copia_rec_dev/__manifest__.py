@@ -4,7 +4,7 @@
     'summary': 'Modulo mantenimiento Copia ficha tecnica.',
     'description': 'Mantenimiento Copia Ficha Tecnica.',
     'author': 'MarcoAG',
-    'depends': ['base', 'web'],
+    'depends': ['base', 'web', 'rec_dev'],
     'data': [
         'views/copia_rec_model_views.xml',
         'security/ir.model.access.csv',
@@ -15,5 +15,5 @@
         ],
     },
     'installable': True,
-    'application': True,
+    'application': True
 }

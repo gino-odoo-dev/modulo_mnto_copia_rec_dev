@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_copiaficha_form" model="ir.ui.view">
+        <field name="name">copiaficha.form</field>
+        <field name="model">copia.ficha</field>
+        <field name="arch" type="xml">
+            <form string="Copia Ficha">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_copiaficha" model="ir.actions.act_window">
+        <field name="name">Copia Ficha</field>
+        <field name="res_model">copia.ficha</field>
+        <field name="view_mode">form</field>
+    </record>
+
+    <menuitem id="menu_copiaficha_root" name="Copia Ficha" sequence="10"/>
+    <menuitem id="menu_copiaficha" name="Gestión de Copia Ficha" parent="menu_copiaficha_root" action="action_copiaficha" sequence="20"/>
+</odoo>

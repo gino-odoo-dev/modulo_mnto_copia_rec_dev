@@ -1,25 +1,50 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <record id="view_copiaficha_form" model="ir.ui.view">
-        <field name="name">copiaficha.form</field>
-        <field name="model">copia.ficha</field>
+    <record id="view_copia_receta_form" model="ir.ui.view">
+        <field name="name">copia.receta.form</field>
+        <field name="model">copia.receta</field>
         <field name="arch" type="xml">
-            <form string="Copia Ficha">
+            <form string="Copia de Ficha Tecnica">
                 <sheet>
                     <group>
-                        <field name="name"/>
+                        <field name="temporadas_id" style="width: 30%;"/>
+                        <field name="articulo_id" style="width: 30%;"/>
+                        <field name="copia_nombre" style="width: 30%;"/>
                     </group>
+                    <header>
+                        <button name="copiar_receta" string="Copiar Receta" type="object" class="oe_highlight"/>
+                    </header>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <record id="action_copiaficha" model="ir.actions.act_window">
-        <field name="name">Copia Ficha</field>
-        <field name="res_model">copia.ficha</field>
+    <record id="view_copia_receta_tree" model="ir.ui.view">
+        <field name="name">copia.receta.tree</field>
+        <field name="model">copia.receta</field>
+        <field name="arch" type="xml">
+            <tree string="Copias de Ficha Tecnica" editable="bottom">
+                <field name="codigosec_id" widget="codigo" class="codigo-field"/>
+                <field name="componente_id" widget="codigo"/>
+                <field name="descripcion" string="Descripcion" readonly="1"/>
+                <field name="comp_manu_id"/>
+                <field name="umedida" string="Umedida" readonly="1"/>
+                <field name="cantidad_id"/>
+                <field name="fact_perdida_id" widget="percentage"/>
+                <field name="c_unitario_id"/>
+                <field name="c_ampliado_id" widget="monetary"/>
+                <field name="depto_id" widget="nombre"/>
+                <field name="copia_nombre"/>
+                <button name="unlink" string="Eliminar" type="object" icon="fa-trash" confirm="¿Estas seguro de eliminar la copia de la ficha tecnica?"/>
+                <button name="copiar_receta" string="Copiar Receta" type="object" class="oe_highlight"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_copia_receta" model="ir.actions.act_window">
+        <field name="name">Copia de Ficha Tecnica</field>
+        <field name="res_model">copia.receta</field>
         <field name="view_mode">form</field>
     </record>
 
-    <menuitem id="menu_copiaficha_root" name="Copia Ficha" sequence="10"/>
-    <menuitem id="menu_copiaficha" name="Gestión de Copia Ficha" parent="menu_copiaficha_root" action="action_copiaficha" sequence="20"/>
+    <menuitem id="menu_copia_receta" name="Copia de Ficha Tecnica" sequence="20" parent="rec_dev.menu_receta" action="action_copia_receta"/>
 </odoo>

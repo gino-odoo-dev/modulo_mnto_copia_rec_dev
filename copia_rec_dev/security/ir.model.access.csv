@@ -1,3 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_copiaficha_user,copiaficha user access,model_copiaficha,base.group_user,1,1,1,1
-access_copiaficha_manager,copiaficha manager access,model_copiaficha,base.group_system,1,1,1,1
+access_copia_receta_user,access_copia_receta_user,model_copia_receta,base.group_user,1,1,1,1

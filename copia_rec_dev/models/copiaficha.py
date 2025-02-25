@@ -124,7 +124,6 @@ class CopiaReceta(models.Model):
         entre el articulo origen y el articulo destino. 
         Esta validacion es crucial para garantizar que los articulos sean compatibles 
         antes de realizar la copia.
-
         """
 # Buscar el articulo en la base de datos
         articulo = self.env['product.template'].search([('default_code', '=', codigo_articulo)], limit=1)
@@ -143,7 +142,6 @@ class CopiaReceta(models.Model):
         """
         Copia las formulas de un artículo origen a otros articulos del mismo modelo,
         excluyendo el artículo origen.
-
         """
 # Validar que el artículo origen y el modelo sean validos
         if not part_o or not m_modelo_o:
@@ -240,7 +238,6 @@ class CopiaReceta(models.Model):
     def _cambia_componente(self, part_o, m_modelo_o, part_d, m_modelo_d):
         """
         Cambia los componentes de una receta en la base de datos.   
-
         """
 # Buscar las formulas del articulo origen
         ps_mstr_origin_records = self.env['ps.mstr'].search([
@@ -284,7 +281,6 @@ class CopiaReceta(models.Model):
     def _crea_ficha_comp(self, comp_origen, comp_destino, temporada):
         """
         Crea la ficha tecnica del componente destino basada en el componente origen.
-
         """
 # Buscar la ficha tecnica del componente destino
         ps_mstr_destino = self.env['ps.mstr'].search([
@@ -472,10 +468,9 @@ class CopiaReceta(models.Model):
 
     def _cambia_materia(self, part_o, m_modelo_o, part_d, m_modelo_d):
         """
-        Cambia las materias primas de un articulo según las reglas definidas.
-                 
+        Cambia las materias primas de un articulo según las reglas definidas.         
         """
-        # Buscar las fórmulas del artículo destino
+# Buscar las fórmulas del artículo destino
         ps_mstr_records = self.env['ps.mstr'].search([
             ('ps_domain', '=', 'global_domain'),
             ('ps_par', '=', part_d),
@@ -483,20 +478,20 @@ class CopiaReceta(models.Model):
         ])
 
         for ps_record in ps_mstr_records:
-            # Buscar el componente actual en pt.mstr
+# Buscar el componente actual en pt.mstr
             pt_record = self.env['pt.mstr'].search([
                 ('pt_domain', '=', 'global_domain'),
                 ('pt_part', '=', ps_record.ps_comp),
-                # Filtra por grupo (Tacos, Contrafuerte, Puntaduras)
+# Filtra por grupo (Tacos, Contrafuerte, Puntaduras)
                 ('pt_group', 'in', ['115', '020', '109'])
             ], limit=1)
 
             if pt_record:
-                # Lógica para determinar el nuevo componente
+# Lógica para determinar el nuevo componente
                 nuevo_componente = self._determinar_nuevo_componente(pt_record)
                 
                 if nuevo_componente:
-                    # Actualizar el componente en la formula
+# Actualizar el componente en la formula
                     ps_record.write({'ps_comp': nuevo_componente})
                 else:
                     raise ValidationError(f"No se pudo determinar un nuevo componente para {pt_record.pt_part}.")
@@ -504,7 +499,6 @@ class CopiaReceta(models.Model):
     def _determinar_nuevo_componente(self, pt_record):
         """
         Determina el nuevo componente basado en el componente actual.
-        
         """
 # Caso 1: Buscar un componente alternativo en el mismo grupo
         nuevo_componente = self.env['pt.mstr'].search([

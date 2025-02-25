@@ -25,8 +25,8 @@ class CopiaReceta(models.Model):
 
     def copia_rec_dev(self):
         """
-        Funcion de validaciones de campos, se valida temporada, artículo origen, artículo destino, estado de manufactura
-        número de origen y destino y numero de combinaciones.
+        Funcion de validaciones de campos, se valida temporada, articulo origen, articulo destino, estado de manufactura
+        numero de origen y destino y numero de combinaciones.
         """
         self.ensure_one()
         try:
@@ -158,7 +158,7 @@ class CopiaReceta(models.Model):
             ('pt_part', '!=', part_o)
         ])
 
-# Borrar formulas antiguas de todos los demas números menos el origen
+# Borrar formulas antiguas de todos los demas numeros menos el origen
         for pt_record in pt_mstr_records:
             ps_mstr_records = self.env['ps.mstr'].search([
                 ('ps_domain', '=', 'global_domain'),
@@ -496,7 +496,7 @@ class CopiaReceta(models.Model):
                 nuevo_componente = self._determinar_nuevo_componente(pt_record)
                 
                 if nuevo_componente:
-                    # Actualizar el componente en la fórmula
+                    # Actualizar el componente en la formula
                     ps_record.write({'ps_comp': nuevo_componente})
                 else:
                     raise ValidationError(f"No se pudo determinar un nuevo componente para {pt_record.pt_part}.")
@@ -525,9 +525,11 @@ class CopiaReceta(models.Model):
         if pt_record.pt_part in mapeo_componentes:
             return mapeo_componentes[pt_record.pt_part]
 
-#  Generar dinámicamente el nuevo componente
+#  Generar el nuevo componente
 #  Agregar un sufijo o prefijo al código original
         if pt_record.pt_part.startswith("PT-"):
             return f"PT-NUEVO-{pt_record.pt_part[3:]}"
 # Si no se encuentra un nuevo componente, devolver None
         return None
+    
+    

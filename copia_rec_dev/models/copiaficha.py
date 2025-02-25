@@ -526,10 +526,9 @@ class CopiaReceta(models.Model):
             return mapeo_componentes[pt_record.pt_part]
 
 #  Generar el nuevo componente
-#  Agregar un sufijo o prefijo al código original
+#  Agregar un sufijo o prefijo al codigo original
         if pt_record.pt_part.startswith("PT-"):
             return f"PT-NUEVO-{pt_record.pt_part[3:]}"
 # Si no se encuentra un nuevo componente, devolver None
         return None
-    
     

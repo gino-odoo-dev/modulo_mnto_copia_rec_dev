@@ -40,3 +40,7 @@ _________________________________________________
   - `_determinar_nuevo_componente` ()
 
 _________________________________________________
+
+### `Cuadro Comparacion`
+
+![Cuadro Comparacion](./cuadro_comparacion.png)

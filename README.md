@@ -38,3 +38,9 @@ _________________________________________________
   - `_copia_color` ()
   - `_cambia_materia` ()
   - `_determinar_nuevo_componente` ()
+
+_________________________________________________
+
+### `Cuadro de comparacion`
+
+(modulo_mnto_copia_rec_dev/cuadro_comparacion.png)

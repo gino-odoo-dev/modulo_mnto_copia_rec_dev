@@ -21,10 +21,11 @@ class CopiaReceta(models.Model):
     xplnta = fields.Char(string="XPlnta", size=3)
     xcolfo = fields.Char(string="XColfo", size=3)
 
-    """
-    Funcion principal que realiza las validaciones y copia de recetas.
-    """
+    
     def copia_rec_dev(self):
+        """
+        Funcion principal que realiza las validaciones y copia de recetas.
+        """
         self.ensure_one()
         try:
 # Validar que la temporada exista en la base de datos
@@ -90,15 +91,14 @@ class CopiaReceta(models.Model):
         except Exception as e:
             self.mensaje = f"Error inesperado: {str(e)}"
 
-
-    """
-    Metodo para obtener el numero de combinaciones de un articulo.
-    es necesaria para cumplir con la validacion del numero de combinaciones 
-    entre el articulo origen y el articulo destino. 
-    Esta validacion es crucial para garantizar que los articulos sean compatibles 
-    antes de realizar la copia.
-    """
     def obtener_numero_combinaciones(self, codigo_articulo):
+        """
+        Metodo para obtener el numero de combinaciones de un articulo.
+        es necesaria para cumplir con la validacion del numero de combinaciones 
+        entre el articulo origen y el articulo destino. 
+        Esta validacion es crucial para garantizar que los articulos sean compatibles 
+        antes de realizar la copia.
+        """
 # Buscar el articulo en la base de datos
         articulo = self.env['product.template'].search([('default_code', '=', codigo_articulo)], limit=1)
         
@@ -110,11 +110,11 @@ class CopiaReceta(models.Model):
             return articulo.x_numero_combinaciones
         else:
             raise ValidationError(f"El artículo {codigo_articulo} no tiene un numero de combinaciones definido.")
-        
-    """
-    Copia las fórmulas de un artículo origen a otros artículos del mismo modelo.
-    """
+           
     def _copia_numero(self, part_o, temporada):
+        """
+        Copia las fórmulas de un artículo origen a otros artículos del mismo modelo.
+        """
         articulos_mismo_modelo = self.env['product.template'].search([
             ('pt_model', '=', self.env['product.template'].browse([('default_code', '=', part_o)]).pt_model),
             ('pt_part_type', '=like', 'PT-%'),
@@ -153,10 +153,10 @@ class CopiaReceta(models.Model):
                     'ps_default': formula.ps_default,
                 })
 
-    """
-    Cambia los componentes de una receta en la base de datos.
-    """
     def _cambia_componente(self, part_o, m_modelo_o, part_d, m_modelo_d):
+        """
+        Cambia los componentes de una receta en la base de datos.
+        """
 # Buscar las formulas del articulo origen
         ps_mstr_origin_records = self.env['ps.mstr'].search([
             ('ps_domain', '=', 'global_domain'),
@@ -201,10 +201,10 @@ class CopiaReceta(models.Model):
                     else:
                         raise ValidationError(f"No se pudo determinar un nuevo componente para {ps_origin.ps_comp}.")
 
-    """
-    Crea la ficha tecnica del componente destino basada en el componente origen.
-    """
     def _crea_ficha_comp(self, comp_origen, comp_destino, temporada):
+        """
+        Crea la ficha tecnica del componente destino basada en el componente origen.
+        """
 # Buscar la ficha tecnica del componente destino
         ps_mstr_destino = self.env['ps.mstr'].search([
             ('ps_domain', '=', 'global_domain'),
@@ -352,10 +352,10 @@ class CopiaReceta(models.Model):
                     'oid_bom_mstr': bom_mstr_origen.oid_bom_mstr,
                 })
                         
-    """
-    Copia las formulas de un articulo origen a un articulo destino.
-    """
     def _copia_color(self, part_o, part_d, temporada):
+        """
+        Copia las formulas de un articulo origen a un articulo destino.
+        """
 # Copiar formulas del articulo origen al destino
         formulas_origen = self.env['ps.mstr'].search([
             ('ps_domain', '=', 'global_domain'),
@@ -394,10 +394,10 @@ class CopiaReceta(models.Model):
             ('id', 'not in', [f.id for f in formulas_origen])
         ]).unlink()
 
-    """
-    Cambia las materias primas de un articulo segun las reglas definidas.
-    """
     def _cambia_materia(self, part_o, m_modelo_o, part_d, m_modelo_d):
+        """
+        Cambia las materias primas de un articulo segun las reglas definidas.
+        """
 # Buscar las formulas del articulo destino
         ps_mstr_records = self.env['ps.mstr'].search([
             ('ps_domain', '=', 'global_domain'),
@@ -426,10 +426,10 @@ class CopiaReceta(models.Model):
             else:
                 raise ValidationError(f"No se encontró el componente actual {ps_record.ps_comp} en pt.mstr.")
 
-    """
-    Determina el nuevo componente basado en el componente actual.
-    """
     def _determinar_nuevo_componente(self, pt_record):
+        """
+        Determina el nuevo componente basado en el componente actual.
+        """
 # Caso 1: Buscar un componente alternativo en el mismo grupo
         nuevo_componente = self.env['pt.mstr'].search([
             ('pt_domain', '=', 'global_domain'),

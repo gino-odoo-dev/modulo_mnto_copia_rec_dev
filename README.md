@@ -43,4 +43,4 @@ _________________________________________________
 
 ### `Cuadro de comparacion`
 
-(.copia_rec_dev/cuadro_comparacion.png)
+(modulo_mnto_copia_rec_dev/copia_rec_dev/cuadro_comparacion.png)

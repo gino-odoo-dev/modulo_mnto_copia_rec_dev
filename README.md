@@ -43,4 +43,4 @@ _________________________________________________
 
 ### `Cuadro de comparacion`
 
-!(C:\Users\macevedo\Desktop\modulo_mnto_copia_rec_dev_dev/cuadro_comparacion.png)
+!(modulo_mnto_copia_rec_dev_dev/cuadro_comparacion.png)

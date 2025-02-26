@@ -43,4 +43,4 @@ _________________________________________________
 
 ### `Cuadro de comparacion`
 
-(modulo_mnto_copia_rec_dev/copia_rec_dev/cuadro_comparacion.png)
+![alt text](https://github.com/gino-odoo-dev/modulo_mnto_copia_rec_dev/copia_rec_dev/cuadro_comparacion.png)

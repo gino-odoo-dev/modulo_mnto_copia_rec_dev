@@ -5,15 +5,15 @@ class CopiaReceta(models.Model):
     _name = 'copia.receta'
     _description = 'Copia de Receta'
 
-    part_o = fields.Char(string="Artículo Origen", required=True)
-    part_d = fields.Char(string="Artículo Destino")
-    m_numero_color = fields.Boolean(string="Copiar Numeraciones/Ficha Técnica", default=True)
+    part_o = fields.Char(string="Articulo Origen", required=True)
+    part_d = fields.Char(string="Articulo Destino")
+    m_numero_color = fields.Boolean(string="Copiar Numeraciones/Ficha Tecnica", default=True)
     temporada = fields.Char(string="Temporada", required=True)
     copia = fields.Boolean(string="Copia")
     m_modelo_o = fields.Char(string="Modelo Origen")
     m_modelo_d = fields.Char(string="Modelo Destino")
-    no_comb_o = fields.Char(string="Número Combinaciones Origen")
-    no_comb_d = fields.Char(string="Número Combinaciones Destino")
+    no_comb_o = fields.Char(string="Numero Combinaciones Origen")
+    no_comb_d = fields.Char(string="Numero Combinaciones Destino")
     remplaza = fields.Char(string="Remplaza")
     mensaje = fields.Char(string="Mensaje", readonly=True)
     xcuero = fields.Char(string="XCuero", size=3)

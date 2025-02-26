@@ -40,7 +40,3 @@ _________________________________________________
   - `_determinar_nuevo_componente` ()
 
 _________________________________________________
-
-### `Cuadro de comparacion`
-
-![alt text](https://github.com/gino-odoo-dev/modulo_mnto_copia_rec_dev/copia_rec_dev/blob/main/assets/cuadro_comparacion.png)

@@ -9,7 +9,6 @@ Modulo Copia Ficha Tecnica.
 ### `copiareceta.model`
 - Fields:
   - `name` (Char)
-  - `_inherit` (Char)
   - `_decription` (Char)
   - `part_o` (Char)
   - `part_d` (Char)
@@ -30,6 +29,7 @@ _________________________________________________
 
 ### `Funciones`
 
+  - `_check_fields` ()
   - `copia_rec_dev` ()
   - `obtener_numero_combinaciones` ()
   - `_copia_numero` ()
@@ -41,7 +41,7 @@ _________________________________________________
 
 _________________________________________________
 
-### `Cuadro Comparacion`
+### `Cuadro Comparacion "codigo progress-codigo python"`
 
 
 ![Cuadro Comparacion](./cuadro_comparacion.png)

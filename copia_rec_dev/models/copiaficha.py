@@ -5,8 +5,8 @@ class CopiaReceta(models.Model):
     _name = 'copia.receta'
     _description = 'Copia de Receta'
 
-    part_o = fields.Char(string="articulo Origen", required=True)
-    part_d = fields.Char(string="articulo Destino")
+    part_o = fields.Char(string="Artículo Origen", required=True)
+    part_d = fields.Char(string="Artículo Destino")
     m_numero_color = fields.Boolean(string="Copiar Numeraciones/Ficha Tecnica", default=True)
     temporada = fields.Char(string="Temporada", required=True)
     copia = fields.Boolean(string="Copia")
@@ -28,11 +28,11 @@ class CopiaReceta(models.Model):
             if not record.temporada:
                 raise ValidationError("El campo 'Temporada' es obligatorio.")
             if not record.part_o:
-                raise ValidationError("El campo 'articulo Origen' es obligatorio.")
+                raise ValidationError("El campo 'Artículo Origen' es obligatorio.")
             if not record.m_numero_color and not record.part_d:
-                raise ValidationError("El campo 'articulo Destino' es obligatorio cuando 'Copiar Numeraciones/Ficha Tecnica' no está marcado.")
+                raise ValidationError("El campo 'Artículo Destino' es obligatorio cuando 'Copiar Numeraciones/Ficha Tecnica' no está marcado.")
             if record.m_numero_color and record.part_d:
-                raise ValidationError("El campo 'articulo Destino' debe estar vacío cuando 'Copiar Numeraciones/Ficha Tecnica' está marcado.")
+                raise ValidationError("El campo 'Artículo Destino' debe estar vacío cuando 'Copiar Numeraciones/Ficha Tecnica' está marcado.")
 
     def copia_rec_dev(self):
         """

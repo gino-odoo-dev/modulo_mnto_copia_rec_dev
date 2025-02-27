@@ -5,8 +5,8 @@ class CopiaReceta(models.Model):
     _name = 'copia.receta'
     _description = 'Copia de Receta'
 
-    part_o = fields.Char(string="Articulo Origen", required=True)
-    part_d = fields.Char(string="Articulo Destino")
+    part_o = fields.Char(string="articulo Origen", required=True)
+    part_d = fields.Char(string="articulo Destino")
     m_numero_color = fields.Boolean(string="Copiar Numeraciones/Ficha Tecnica", default=True)
     temporada = fields.Char(string="Temporada", required=True)
     copia = fields.Boolean(string="Copia")
@@ -21,14 +21,26 @@ class CopiaReceta(models.Model):
     xplnta = fields.Char(string="XPlnta", size=3)
     xcolfo = fields.Char(string="XColfo", size=3)
 
-    
+# Validacion de Campos, se validan antes de cualquier operacion.
+    @api.constrains('temporada', 'part_o', 'part_d', 'm_numero_color')
+    def _check_fields(self):
+        for record in self:
+            if not record.temporada:
+                raise ValidationError("El campo 'Temporada' es obligatorio.")
+            if not record.part_o:
+                raise ValidationError("El campo 'articulo Origen' es obligatorio.")
+            if not record.m_numero_color and not record.part_d:
+                raise ValidationError("El campo 'articulo Destino' es obligatorio cuando 'Copiar Numeraciones/Ficha Tecnica' no está marcado.")
+            if record.m_numero_color and record.part_d:
+                raise ValidationError("El campo 'articulo Destino' debe estar vacío cuando 'Copiar Numeraciones/Ficha Tecnica' está marcado.")
+
     def copia_rec_dev(self):
         """
         Funcion principal que realiza las validaciones y copia de recetas.
         """
         self.ensure_one()
         try:
-# Validar que la temporada exista en la base de datos
+# Validar que la temporada exista en la base de datos.
             temporada_existente = self.env['code.mstr'].search([
                 ('code_domain', '=', 'global_domain'),
                 ('code_fldname', '=', 'TEMPORADA'),
@@ -37,59 +49,75 @@ class CopiaReceta(models.Model):
             if not temporada_existente:
                 raise ValidationError("La temporada no existe.")
 
-# Validar articulo origen
+# Validar articulo origen.
             if not self.part_o:
-                raise ValidationError("El artículo origen no puede estar vacío.")
+                raise ValidationError("El articulo origen no puede estar vacío.")
             articulo_origen = self.env['product.template'].search([('default_code', '=', self.part_o)], limit=1)
             if not articulo_origen:
-                raise ValidationError("El artículo origen no existe.")
+                raise ValidationError("El articulo origen no existe.")
             if not articulo_origen.pt_part_type.startswith("PT-"):
-                raise ValidationError("El artículo origen debe ser de tipo 'PT-'.")
+                raise ValidationError("El articulo origen debe ser de tipo 'PT-'.")
             if articulo_origen.pt_pm_code != 'M':
-                raise ValidationError("El artículo origen debe estar marcado como manufacturado.")
+                raise ValidationError("El articulo origen debe estar marcado como manufacturado.")
 
-# Validar estructura para la temporada
+# Validar estructura para la temporada.
             estructura_existente = self.env['ps.mstr'].search([
                 ('ps_domain', '=', 'global_domain'),
                 ('ps_par', '=', self.part_o),
                 ('ps_ref', '=', self.temporada)
             ], limit=1)
             if not estructura_existente:
-                raise ValidationError("El artículo origen no tiene estructura para la temporada.")
+                raise ValidationError("El articulo origen no tiene estructura para la temporada.")
 
-# Validar articulo destino (si no es copia de número/color)
-            if not self.m_numero_color:
+# Validar articulo destino (si no es copia de número/color).
+            if self.m_numero_color:
+                if self.part_d:
+                    raise ValidationError("El articulo destino debe estar vacío cuando se copia numeraciones/ficha técnica.")
+            else:
                 if not self.part_d:
-                    raise ValidationError("El artículo destino no puede estar vacío.")
+                    raise ValidationError("El articulo destino no puede estar vacío.")
                 articulo_destino = self.env['product.template'].search([('default_code', '=', self.part_d)], limit=1)
                 if not articulo_destino:
-                    raise ValidationError("El artículo destino no existe.")
+                    raise ValidationError("El articulo destino no existe.")
                 if not articulo_destino.pt_part_type.startswith("PT-"):
-                    raise ValidationError("El artículo destino debe ser de tipo 'PT-'.")
+                    raise ValidationError("El articulo destino debe ser de tipo 'PT-'.")
                 if articulo_destino.pt_pm_code != 'M':
-                    raise ValidationError("El artículo destino debe estar marcado como manufacturado.")
+                    raise ValidationError("El articulo destino debe estar marcado como manufacturado.")
                 if self.part_o == self.part_d:
-                    raise ValidationError("El artículo origen y destino no pueden ser iguales.")
+                    raise ValidationError("El articulo origen y destino no pueden ser iguales.")
                 if self.m_modelo_o == self.m_modelo_d:
                     raise ValidationError("El modelo de origen y destino deben ser diferentes.")
 
-# Validar numero de combinaciones
+# Validar numero de combinaciones.
                 if self.no_comb_o != self.no_comb_d:
-                    raise ValidationError("El número de combinaciones no coincide entre el artículo origen y destino.")
+                    raise ValidationError("El número de combinaciones no coincide entre el articulo origen y destino.")
 
-# Logica de copia
+# Validar si el articulo destino ya tiene ficha tecnica para la temporada.
+                ficha_tecnica_existente = self.env['ps.mstr'].search([
+                    ('ps_domain', '=', 'global_domain'),
+                    ('ps_par', '=', self.part_d),
+                    ('ps_ref', '=', self.temporada)
+                ], limit=1)
+                if ficha_tecnica_existente:
+                    raise ValidationError("El articulo destino ya tiene una ficha técnica para la temporada especificada.")
+
+# Logica de copia.
             if self.m_numero_color:
-                self._copia_numero(self.part_o, self.m_modelo_o)
+                self._copia_numero(self.part_o, self.temporada)
             else:
-                self._copia_color(self.part_o, self.m_modelo_o, self.part_d, self.m_modelo_d)
+                self._copia_color(self.part_o, self.part_d, self.temporada)
                 self._cambia_materia(self.part_o, self.m_modelo_o, self.part_d, self.m_modelo_d)
                 self._cambia_componente(self.part_o, self.m_modelo_o, self.part_d, self.m_modelo_d)
 
             self.mensaje = "Proceso de copia completado correctamente."
         except ValidationError as e:
             self.mensaje = f"Error de validación: {str(e)}"
+            self.env.cr.rollback()  # Detener la operación
+            return 
         except Exception as e:
             self.mensaje = f"Error inesperado: {str(e)}"
+            self.env.cr.rollback()  # Detener la operación
+            return 
 
     def obtener_numero_combinaciones(self, codigo_articulo):
         """
@@ -99,30 +127,31 @@ class CopiaReceta(models.Model):
         Esta validacion es crucial para garantizar que los articulos sean compatibles 
         antes de realizar la copia.
         """
-# Buscar el articulo en la base de datos
+# Buscar el articulo en la base de datos.
         articulo = self.env['product.template'].search([('default_code', '=', codigo_articulo)], limit=1)
         
         if not articulo:
             raise ValidationError(f"El articulo {codigo_articulo} no existe.")
         
-# Suponiendo que el numero de combinaciones esta en un campo personalizado llamado 'x_numero_combinaciones'
+# Suponiendo que el numero de combinaciones esta en un campo personalizado llamado 'x_numero_combinaciones'.
         if hasattr(articulo, 'x_numero_combinaciones'):
             return articulo.x_numero_combinaciones
         else:
-            raise ValidationError(f"El artículo {codigo_articulo} no tiene un numero de combinaciones definido.")
+            raise ValidationError(f"El articulo {codigo_articulo} no tiene un numero de combinaciones definido.")
            
     def _copia_numero(self, part_o, temporada):
         """
-        Copia las fórmulas de un artículo origen a otros artículos del mismo modelo.
+        Copia las formulas de un articulo origen a otros articulos del mismo modelo.
         """
+        articulo_origen = self.env['product.template'].search([('default_code', '=', part_o)], limit=1)
         articulos_mismo_modelo = self.env['product.template'].search([
-            ('pt_model', '=', self.env['product.template'].browse([('default_code', '=', part_o)]).pt_model),
+            ('pt_model', '=', articulo_origen.pt_model),
             ('pt_part_type', '=like', 'PT-%'),
             ('pt_pm_code', '=', 'M'),
             ('default_code', '!=', part_o)
         ])
 
-# Copiar formulas
+# Copiar formulas.
         for articulo in articulos_mismo_modelo:
             formulas_origen = self.env['ps.mstr'].search([
                 ('ps_domain', '=', 'global_domain'),
@@ -157,25 +186,31 @@ class CopiaReceta(models.Model):
         """
         Cambia los componentes de una receta en la base de datos.
         """
-# Buscar las formulas del articulo origen
+# Buscar las formulas del articulo origen.
         ps_mstr_origin_records = self.env['ps.mstr'].search([
             ('ps_domain', '=', 'global_domain'),
             ('ps_par', '=', part_o),
             ('ps_ref', '=', self.temporada)
         ])
 
-# Buscar las formulas del articulo destino
+        if not ps_mstr_origin_records:
+            raise ValidationError(f"No se encontraron registros de origen para el articulo {part_o} y la temporada {self.temporada}.")
+
+# Buscar las formulas del articulo destino.
         ps_mstr_dest_records = self.env['ps.mstr'].search([
             ('ps_domain', '=', 'global_domain'),
             ('ps_par', '=', part_d),
             ('ps_ref', '=', self.temporada)
         ])
 
-# Cambiar los componentes en las formulas del articulo destino
+        if not ps_mstr_dest_records:
+            raise ValidationError(f"No se encontraron registros de destino para el articulo {part_d} y la temporada {self.temporada}.")
+
+# Cambiar los componentes en las formulas del articulo destino.
         for ps_dest in ps_mstr_dest_records:
             for ps_origin in ps_mstr_origin_records:
                 if ps_dest.ps_comp == m_modelo_o:
-# Buscar un componente alternativo
+# Buscar un componente alternativo.
                     nuevo_componente = self._determinar_nuevo_componente(ps_origin.ps_comp)
                     if nuevo_componente:
                         ps_dest.write({
@@ -205,18 +240,18 @@ class CopiaReceta(models.Model):
         """
         Crea la ficha tecnica del componente destino basada en el componente origen.
         """
-# Buscar la ficha tecnica del componente destino
+# Buscar la ficha tecnica del componente destino.
         ps_mstr_destino = self.env['ps.mstr'].search([
             ('ps_domain', '=', 'global_domain'),
             ('ps_par', '=', comp_destino),
             ('ps_ref', '=', temporada)
         ], limit=1)
 
-# Si ya existe la ficha tecnica del componente destino, lanzar una excepcion
+# Si ya existe la ficha tecnica del componente destino, lanzar una excepcion.
         if ps_mstr_destino:
             raise ValidationError(f"La ficha técnica del componente destino {comp_destino} ya existe para la temporada {temporada}.")
 
-# Si no existe la ficha tecnica del componente destino, se procede a crearla
+# Si no existe la ficha tecnica del componente destino, se procede a crearla.
         ps_mstr_origen_records = self.env['ps.mstr'].search([
             ('ps_domain', '=', 'global_domain'),
             ('ps_par', '=', comp_origen),
@@ -224,13 +259,13 @@ class CopiaReceta(models.Model):
         ])
 
         for ps_origen in ps_mstr_origen_records:
-# Determinar si se debe cambiar el numero del componente
+# Determinar si se debe cambiar el numero del componente.
             comp_cambia_num = (
                 ps_origen.ps_comp[-3:] == comp_origen[-3:]
             )
             comp_numero = comp_destino[-3:] if comp_cambia_num else ""
 
-# Crear la nueva ficha tecnica para el componente destino
+# Crear la nueva ficha tecnica para el componente destino.
             self.env['ps.mstr'].create({
                 'ps_par': comp_destino,
                 'ps_comp': (
@@ -295,10 +330,9 @@ class CopiaReceta(models.Model):
                 'ps__qadl01': ps_origen.ps__qadl01,
                 'ps__qadl02': ps_origen.ps__qadl02,
                 'ps_domain': ps_origen.ps_domain,
-                'oid_ps_mstr': ps_origen.oid_ps_mstr,
             })
 
-# Crear la tabla de cabecera (bom_mstr) si no existe
+# Crear la tabla de cabecera (bom_mstr) si no existe.
         bom_mstr_destino = self.env['bom.mstr'].search([
             ('bom_domain', '=', 'global_domain'),
             ('bom_parent', '=', comp_destino)
@@ -349,77 +383,83 @@ class CopiaReceta(models.Model):
                     'bom__qadl02': bom_mstr_origen.bom__qadl02,
                     'bom_mthd_qtycompl': bom_mstr_origen.bom_mthd_qtycompl,
                     'bom_domain': bom_mstr_origen.bom_domain,
-                    'oid_bom_mstr': bom_mstr_origen.oid_bom_mstr,
                 })
-                        
-    def _copia_color(self, part_o, part_d, temporada):
+
+    def _copia_color(self, part_o, part_d, temporada): 
         """
         Copia las formulas de un articulo origen a un articulo destino.
         """
-# Copiar formulas del articulo origen al destino
-        formulas_origen = self.env['ps.mstr'].search([
-            ('ps_domain', '=', 'global_domain'),
-            ('ps_par', '=', part_o),
-            ('ps_ref', '=', temporada)
-        ])
-        for formula in formulas_origen:
-            self.env['ps.mstr'].create({
-                'ps_par': part_d,
-                'ps_comp': formula.ps_comp,
-                'ps_ref': formula.ps_ref,
-                'ps_qty_per': formula.ps_qty_per,
-                'ps_scrp_pct': formula.ps_scrp_pct,
-                'ps_ps_code': formula.ps_ps_code,
-                'ps_lt_off': formula.ps_lt_off,
-                'ps_start': formula.ps_start,
-                'ps_end': formula.ps_end,
-                'ps_rmks': formula.ps_rmks,
-                'ps_op': formula.ps_op,
-                'ps_item_no': formula.ps_item_no,
-                'ps_mandatory': formula.ps_mandatory,
-                'ps_exclusive': formula.ps_exclusive,
-                'ps_process': formula.ps_process,
-                'ps_qty_type': formula.ps_qty_type,
-                'ps_user1': formula.ps_user1,
-                'ps_user2': formula.ps_user2,
-                'ps_fcst_pct': formula.ps_fcst_pct,
-                'ps_default': formula.ps_default,
-            })
+        try:
+# Verificar si el articulo destino ya tiene formulas, si tiene formula se eliminan.
+            formulas_existentes = self.env['ps.mstr'].search([
+                ('ps_domain', '=', 'global_domain'),
+                ('ps_par', '=', part_d),
+                ('ps_ref', '=', temporada)
+            ])
+            if formulas_existentes:
+                formulas_existentes.unlink()
 
-# Borrar formulas antiguas del articulo destino solo si la copia fue exitosa
-        self.env['ps.mstr'].search([
-            ('ps_domain', '=', 'global_domain'),
-            ('ps_par', '=', part_d),
-            ('ps_ref', '=', temporada),
-            ('id', 'not in', [f.id for f in formulas_origen])
-        ]).unlink()
+# Copiar formulas del articulo origen al destino.
+            formulas_origen = self.env['ps.mstr'].search([
+                ('ps_domain', '=', 'global_domain'),
+                ('ps_par', '=', part_o),
+                ('ps_ref', '=', temporada)
+            ])
+            for formula in formulas_origen:
+                self.env['ps.mstr'].create({
+                    'ps_par': part_d,
+                    'ps_comp': formula.ps_comp,
+                    'ps_ref': formula.ps_ref,
+                    'ps_qty_per': formula.ps_qty_per,
+                    'ps_scrp_pct': formula.ps_scrp_pct,
+                    'ps_ps_code': formula.ps_ps_code,
+                    'ps_lt_off': formula.ps_lt_off,
+                    'ps_start': formula.ps_start,
+                    'ps_end': formula.ps_end,
+                    'ps_rmks': formula.ps_rmks,
+                    'ps_op': formula.ps_op,
+                    'ps_item_no': formula.ps_item_no,
+                    'ps_mandatory': formula.ps_mandatory,
+                    'ps_exclusive': formula.ps_exclusive,
+                    'ps_process': formula.ps_process,
+                    'ps_qty_type': formula.ps_qty_type,
+                    'ps_user1': formula.ps_user1,
+                    'ps_user2': formula.ps_user2,
+                    'ps_fcst_pct': formula.ps_fcst_pct,
+                    'ps_default': formula.ps_default,
+                })
+        except Exception as e:
+            raise ValidationError(f"Error al eliminar las fórmulas existentes: {str(e)}")
 
     def _cambia_materia(self, part_o, m_modelo_o, part_d, m_modelo_d):
         """
         Cambia las materias primas de un articulo segun las reglas definidas.
         """
-# Buscar las formulas del articulo destino
+# Buscar las formulas del articulo destino.
         ps_mstr_records = self.env['ps.mstr'].search([
             ('ps_domain', '=', 'global_domain'),
             ('ps_par', '=', part_d),
             ('ps_ref', '=', self.temporada)
         ])
+# Validar si ps_mstr_records esta vacio.
+        if not ps_mstr_records:
+            raise ValidationError(f"No se encontraron registros de destino para el articulo {part_d} y la temporada {self.temporada}.")
 
         for ps_record in ps_mstr_records:
-# Buscar el componente actual en pt.mstr
+# Buscar el componente actual en pt.mstr.
             pt_record = self.env['pt.mstr'].search([
                 ('pt_domain', '=', 'global_domain'),
                 ('pt_part', '=', ps_record.ps_comp),
-# Filtra por grupo (Tacos, Contrafuerte, Puntaduras)
+# Filtra por grupo (Tacos, Contrafuerte, Puntaduras).
                 ('pt_group', 'in', ['115', '020', '109'])
             ], limit=1)
 
             if pt_record:
-# Logica para determinar el nuevo componente
+# Logica para determinar el nuevo componente.
                 nuevo_componente = self._determinar_nuevo_componente(pt_record)
                 
                 if nuevo_componente:
-# Actualizar el componente en la formula
+# Actualizar el componente en la formula.
                     ps_record.write({'ps_comp': nuevo_componente})
                 else:
                     raise ValidationError(f"No se pudo determinar un nuevo componente para {pt_record.pt_part}.")
@@ -430,7 +470,7 @@ class CopiaReceta(models.Model):
         """
         Determina el nuevo componente basado en el componente actual.
         """
-# Caso 1: Buscar un componente alternativo en el mismo grupo
+# Caso 1: Buscar un componente alternativo en el mismo grupo.
         nuevo_componente = self.env['pt.mstr'].search([
             ('pt_domain', '=', 'global_domain'),
             ('pt_group', '=', pt_record.pt_group),  
@@ -440,7 +480,7 @@ class CopiaReceta(models.Model):
         if nuevo_componente:
             return nuevo_componente.pt_part
 
-# Caso 2: Usar un mapeo predefinido
+# Caso 2: Usar un mapeo predefinido.
         mapeo_componentes = {
             'COMPONENTE_ANTIGUO_1': 'COMPONENTE_NUEVO_1',
             'COMPONENTE_ANTIGUO_2': 'COMPONENTE_NUEVO_2',
@@ -449,11 +489,10 @@ class CopiaReceta(models.Model):
         if pt_record.pt_part in mapeo_componentes:
             return mapeo_componentes[pt_record.pt_part]
 
-# Caso 3: Generar el nuevo componente
-# Agregar un sufijo o prefijo al código original
+# Caso 3: Generar el nuevo componente.
+# Agregar un sufijo o prefijo al código original.
         if pt_record.pt_part.startswith("PT-"):
             return f"PT-NUEVO-{pt_record.pt_part[3:]}"
 
-# Si no se encuentra un nuevo componente, devolver None
+# Si no se encuentra un nuevo componente, devolver None.
         return None
-    

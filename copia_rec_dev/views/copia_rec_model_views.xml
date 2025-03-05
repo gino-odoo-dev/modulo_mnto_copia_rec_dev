@@ -6,10 +6,10 @@
             <form string="Copia de Ficha Tecnica">
                 <sheet>
                     <group>
-                        <field name="temporada" style="width: 30%;"/>
-                        <field name="part_o" style="width: 30%;"/>
-                        <field name="m_numero_color" style="width: 30%;"/>
-                        <field name="part_d" style="width: 30%;"/>
+                        <field name="temporadas_id" style="width: 40%;"/>
+                        <field name="part_o" style="width: 40%;"/>
+                        <field name="m_numero_color" style="width: 40%;"/>
+                        <field name="part_d" style="width: 40%;"/>
                     </group>
                     <header>
                         <button name="copia_rec_dev" string="Copiar Receta" type="object" class="oe_highlight"/>

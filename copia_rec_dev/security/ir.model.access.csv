@@ -1,2 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_copia_receta_user,access_copia_receta_user,model_copia_receta,base.group_user,1,1,1,1
+access_copia_ficha_user,access_copia_ficha_user,model_copia_ficha,base.group_user,1,1,1,1
+access_copia_ficha_manager,access_copia_ficha_manager,model_copia_ficha,base.group_system,1,1,1,1
+access_receta_user,access_receta_user,model_receta,base.group_user,1,1,1,1
+access_receta_manager,access_receta_manager,model_receta,base.group_system,1,1,1,1

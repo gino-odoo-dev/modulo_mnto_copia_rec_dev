@@ -1,28 +1,25 @@
 <odoo>
-    <record id="view_copia_receta_form" model="ir.ui.view">
-        <field name="name">copia.receta.form</field>
-        <field name="model">copia.receta</field>
+    <record id="view_copia_ficha_form" model="ir.ui.view">
+        <field name="name">copia.ficha.form</field>
+        <field name="model">copia.ficha</field>
         <field name="arch" type="xml">
-            <form string="Copia de Ficha Tecnica">
+            <form string="Copia de Ficha Tecnica" create="0">
                 <sheet>
                     <group>
-                        <field name="temporadas_id" style="width: 40%;"/>
+                        <field name="temporada" style="width: 40%;" readonly="1"/>
                         <field name="part_o" style="width: 40%;"/>
                         <field name="m_numero_color" style="width: 40%;"/>
                         <field name="part_d" style="width: 40%;"/>
                     </group>
-                    <header>
-                        <button name="copia_rec_dev" string="Copiar Receta" type="object" class="oe_highlight"/>
-                    </header>
                 </sheet>
             </form>
         </field>
     </record>
-    <record id="action_copia_receta" model="ir.actions.act_window">
+    <record id="action_copia_ficha" model="ir.actions.act_window">
         <field name="name">Copia de Ficha Tecnica</field>
-        <field name="res_model">copia.receta</field>
+        <field name="res_model">copia.ficha</field>
         <field name="view_mode">form</field>
     </record>
 
-    <menuitem id="menu_copia_receta" name="Copia de Ficha Tecnica" sequence="20" parent="rec_dev.menu_receta" action="action_copia_receta"/>
+    <menuitem id="menu_copia_ficha" name="Copia de Ficha Tecnica" sequence="20" parent="receta_dev.menu_receta" action="action_copia_ficha"/>
 </odoo>

@@ -1,22 +1,15 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
-class CopiaReceta(models.Model):
-    _name = 'copia.receta'
-    _description = 'Copia de Receta'
-    _order = 'sequence asc, id asc'
+class CopiaFicha(models.Model):
+    _name = 'copia.ficha'
+    _description = 'Copia de Ficha Tecnica'
 
-    temporadas_id = fields.Many2one(
-        'receta', 
-        string='Temporadas', 
-        required=True, 
-        ondelete='restrict',
-        domain=lambda self: [('id', '=', self.env['receta'].search([], order='id desc', limit=1).id)]
-    )
+    temporadas_id = fields.Many2one('receta', string='Temporadas', required=True, compute='_compute_temporadas_id', store=True)
 
     sequence = fields.Integer(string="Secuencia", default=10)
-    part_o = fields.Many2one('articulo.model', string='Articulo Origen', required=True)
-    part_d = fields.Many2one('articulo.model', string='Articulo Destino', required=True)
+    part_o = fields.Many2one('cl.product.articulo', string='Articulo Origen', required=True)
+    part_d = fields.Many2one('cl.product.articulo', string='Articulo Destino', required=True)
     m_numero_color = fields.Boolean(string="Copiar Numeraciones/Ficha Tecnica", default=True)
     copia = fields.Boolean(string="Copia")
     m_modelo_o = fields.Char(string="Modelo Origen")
@@ -31,7 +24,18 @@ class CopiaReceta(models.Model):
     xcolfo = fields.Char(string="XColfo", size=3)
 
     temporada = fields.Char(string="Temporada", required=False)
-    
+
+    @api.depends('create_date')
+    def _compute_temporadas_id(self):
+        for record in self:
+            latest_receta = self.env['receta'].search([], order='id desc', limit=1)
+            record.temporadas_id = latest_receta.id if latest_receta else False
+
+    @api.model
+    def create(self, vals):
+        latest_receta = self.env['receta'].search([], order='id desc', limit=1)
+        vals['temporadas_id'] = latest_receta.id if latest_receta else False
+        return super(CopiaFicha, self).create(vals)
 
 # Validacion de Campos, se validan antes de cualquier operacion.
     @api.constrains('temporadas_id', 'part_o', 'part_d', 'm_numero_color')
@@ -506,12 +510,3 @@ class CopiaReceta(models.Model):
 
 # Si no se encuentra un nuevo componente, devolver None.
         return None
-
-    @api.model
-    def create(self, vals):
-        record = super(CopiaReceta, self).create(vals)
-        # Update temporadas_id to reflect the latest record in receta table
-        latest_receta = self.env['receta'].search([], order='id desc', limit=1)
-        if latest_receta:
-            record.temporadas_id = latest_receta.id
-        return record
